@@ -404,3 +404,5 @@ def groupProfit(companyList,companyName):
 
 profitResult=groupProfit(my_company,'腾讯子公司A')
 print(profitResult)
+
+我是提交测试
