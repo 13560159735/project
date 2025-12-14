@@ -20,17 +20,21 @@ df=pd.read_excel(
 # df ,这种数据结构我们没学过，而且是这个库自创的数据结构
 # 需要喂给for的东西一般是列表
 # for用
-newList=df.values.tolist()
-print(newList)
-sum=0
-for i in newList:
-    print(i)
-    for j in i:
-        # print(pd.isna(j))
-        if pd.isna(j):
-            sum=sum+1
+# newList=df.values.tolist()
+# print(newList)
+# sum=0
+# for i in newList:
+#     print(i)
+#     for j in i:
+#         # print(pd.isna(j))
+#         if pd.isna(j):
+#             sum=sum+1
 
-print(sum)
+# print(sum)
+print(df)
+print('11111111111111')
+df1=df.dropna(how='all')
+print(df1)
 
 
 
