@@ -274,85 +274,85 @@
 #     max:33,
 #     min:6
 # }
-# my_company=[{
-#     'name':'阿里巴巴',
-#     'profit':1,
-#     'stocks':True,
-#     'children':[{
-#         'name':'阿里子公司A',
-#         'profit':2,
-#         'stocks':True,
-#     },{
-#         'name':'阿里子公司B',
-#         'profit':3,
-#         'stocks':False,
-#     }]
-# },{
-#     'name':'百度',
-#     'profit':4,
-#     'stocks':True, 
-#     'children':[{
-#         'name':'百度子公司A',
-#         'profit':5,
-#         'stocks':True,
-#     },{
-#         'name':'百度子公司B',
-#         'profit':6,
-#         'stocks':False,
-#     }] 
-# },{
-#     'name':'华为',
-#     'profit':7,
-#     'stocks':False,
-#     'children':[{
-#         'name':'华为子公司A',
-#         'profit':8,
-#         'stocks':True,
-#     },{
-#         'name':'华为子公司B',
-#         'profit':9,
-#         'stocks':False,
-#     }] 
-# },{
-#     'name':'腾讯',
-#     'profit':10,
-#     'stocks':True,
-#      'children':[{
-#         'name':'腾讯子公司A',
-#         'profit':11,
-#         'stocks':True,
-#     },{
-#         'name':'腾讯子公司B',
-#         'profit':12,
-#         'stocks':False,
-#     }] 
-# }]
+my_company=[{
+    'name':'阿里巴巴',
+    'profit':1,
+    'stocks':True,
+    'children':[{
+        'name':'阿里子公司A',
+        'profit':2,
+        'stocks':True,
+    },{
+        'name':'阿里子公司B',
+        'profit':3,
+        'stocks':False,
+    }]
+},{
+    'name':'百度',
+    'profit':4,
+    'stocks':True, 
+    'children':[{
+        'name':'百度子公司A',
+        'profit':5,
+        'stocks':True,
+    },{
+        'name':'百度子公司B',
+        'profit':6,
+        'stocks':False,
+    }] 
+},{
+    'name':'华为',
+    'profit':7,
+    'stocks':False,
+    'children':[{
+        'name':'华为子公司A',
+        'profit':8,
+        'stocks':True,
+    },{
+        'name':'华为子公司B',
+        'profit':9,
+        'stocks':False,
+    }] 
+},{
+    'name':'腾讯',
+    'profit':10,
+    'stocks':True,
+     'children':[{
+        'name':'腾讯子公司A',
+        'profit':11,
+        'stocks':True,
+    },{
+        'name':'腾讯子公司B',
+        'profit':12,
+        'stocks':False,
+    }] 
+}]
 
-# def totalProfit(companyList):
-#     profit=0
-#     for i in companyList:
-#         profit=profit+i['profit']
-#         for j in i['children']:
-#             profit=profit+j['profit']
-#     return profit
+def totalProfit(companyList):
+    profit=0
+    for i in companyList:
+        profit=profit+i['profit']
+        for j in i['children']:
+            profit=profit+j['profit']
+    return profit
 
-# profit=totalProfit(my_company) 
-# print(profit)
-# 
-# def CompanyProfit(companyList):   
-#     profit=[]
-#     for i in companyList:
-#         # profitCurrent=0
-#         # profitCurrent=profitCurrent+i['profit']
+profit=totalProfit(my_company) 
+print(profit)
 
-#         profitCurrent=i['profit']
-#         for j in i['children']:
-#             profitCurrent=profitCurrent+j['profit']
-#         profit.append(profitCurrent)
-#     return profit
+def CompanyProfit(companyList):   
+    profit=[]
+    for i in companyList:
+        # profitCurrent=0
+        # profitCurrent=profitCurrent+i['profit']
 
-# profit=CompanyProfit(my_company) 
-# print(profit)
+        profitCurrent=i['profit']
+        for j in i['children']:
+            profitCurrent=profitCurrent+j['profit']
+        profit.append(profitCurrent)
+    return profit
+
+profit=CompanyProfit(my_company) 
+print(profit)
 
 
 # def companyProfitDic(companyList):
