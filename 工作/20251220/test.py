@@ -6,26 +6,26 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 import xlwings as xw
 
 dfReadOld = pd.read_excel(
-    '鞋城序202510.xlsx', 
-    sheet_name='会计分录序时簿',
+    '总部序202510.xlsx', 
+    sheet_name='Sheet1',
     header=[0],
     usecols=['日期','凭证字号','摘要','科目代码', '科目名称', '借方金额', '贷方金额'],
     dtype={'日期' : str,'凭证字号' : str,'摘要' : str,'科目代码' : str,'科目名称' : str,'借方金额' : str,'贷方金额' : str},
 )
 dfReadNew = pd.read_excel(
-    '鞋城序202511.xlsx', 
-    sheet_name='会计分录序时簿',
+    '总部序202511.xlsx', 
+    sheet_name='Sheet1',
     header=[0],
     usecols=['日期','凭证字号','摘要','科目代码', '科目名称', '借方金额', '贷方金额'],
     dtype={'日期' : str,'凭证字号' : str,'摘要' : str,'科目代码' : str,'科目名称' : str,'借方金额' : str,'贷方金额' : str},
 )
 
 appOld = xw.App(visible=False)  # 不显示Excel界面
-wbOld = appOld.books.open('鞋城序202510.xlsx')
+wbOld = appOld.books.open('总部序202510.xlsx')
 wsOld = wbOld.sheets[0]
 
 appNew = xw.App(visible=False)  # 不显示Excel界面
-wbNew = appNew.books.open('鞋城序202511.xlsx')
+wbNew = appNew.books.open('总部序202511.xlsx')
 wsNew = wbNew.sheets[0]
 
 oldList=dfReadOld.values.tolist()
@@ -103,11 +103,11 @@ for index,item in enumerate(oldList):
 with open('result.json', 'w', encoding='utf-8') as f:
     json.dump(result, f, ensure_ascii=False, indent=4)
 
-wbOld.save('鞋城序202510.xlsx')
+wbOld.save('总部序202510.xlsx')
 wbOld.close()
 appOld.quit()
 
-wbNew.save('鞋城序202511.xlsx')
+wbNew.save('总部序202511.xlsx')
 wbNew.close()
 appNew.quit()
 
