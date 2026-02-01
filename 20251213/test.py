@@ -1,3 +1,13 @@
+图表相关网站：
+（1）echarts官网
+https://echarts.apache.org/examples/zh/index.html#chart-type-line
+（2）ISWWQ
+https://www.isqqw.com/?t=line
+（3）Made A Pie
+https://www.makeapie.cn/echarts_2.html
+（4）MCChart
+https://echarts.zhangmuchen.top/
+
 # 需求：
 # 1、考核收入：
 # 按月或按季度，分别输出
