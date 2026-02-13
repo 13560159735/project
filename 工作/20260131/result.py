@@ -158,9 +158,9 @@ for sheet_name,df in dfCountRate.items():
     wsChild[4,column].value=floorValue["四"]['rate']
     wsChild[5,column].value=floorValue["五"]['rate']
     wsChild[6,column].value=floorValue["总体"]['rate']
-    wsChild[7,column].value=floorValue["总体"]['totalArea']
-    wsChild[8,column].value=floorValue["总体"]['hasRentArea']
-    wsChild[9,column].value=floorValue["总体"]['notHasRentArea']
+    wsChild[7,column].value=f"{floorValue["总体"]['totalArea']:,.2f}"   
+    wsChild[8,column].value=f"{floorValue["总体"]['hasRentArea']:,.2f}"
+    wsChild[9,column].value=f"{floorValue["总体"]['notHasRentArea']:,.2f}"
 
 wbChild.save('合同台账_1到12月统计.xlsx')
 wbChild.close()
