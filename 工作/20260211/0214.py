@@ -42,7 +42,7 @@ for index,item in enumerate(dfReadLeftList):
             'indexAll':[]
         }
     if (not pd.isna(item[typeToColumnOfLeft['金额']])):
-        leftResult[currentOrderNumber]['amount']=leftResult[currentOrderNumber]['amount']+item[typeToColumnOfLeft['金额']]
+        leftResult[currentOrderNumber]['amount']=round(leftResult[currentOrderNumber]['amount']+item[typeToColumnOfLeft['金额']],2)
         leftResult[currentOrderNumber]['isna']=False
     leftResult[currentOrderNumber]['indexAll'].append(index)
 
@@ -74,9 +74,43 @@ for index,item in enumerate(dfReadRightList):
                 'indexAll':[]
             }
         if (not pd.isna(item[typeToColumnOfRight['贷方金额']])):
-            rightResult[currentOrderNumber]['amount']=rightResult[currentOrderNumber]['amount']+item[typeToColumnOfRight['贷方金额']]
+            rightResult[currentOrderNumber]['amount']=round(rightResult[currentOrderNumber]['amount']+item[typeToColumnOfRight['贷方金额']],2)
             rightResult[currentOrderNumber]['isna']=False
         rightResult[currentOrderNumber]['indexAll'].append(index)
 
 with open(f'rightResult.json','w',encoding='utf-8') as f:
     json.dump(rightResult,f,ensure_ascii=False, indent=4)
+
+appMain=xw.App(visible=True)
+wbMain=appMain.books.open('123.xlsx')
+wsMain=wbMain.sheets['南京-2025-销售']
+needAddLineAfter=[]
+for key,value in leftResult.items():
+    if key in rightResult:
+        if (not leftResult[key]['isna']) and (not rightResult[key]['isna']) and (leftResult[key]['amount']==rightResult[key]['amount']):
+            if len(leftResult[key]['indexAll']) != len(rightResult[key]['indexAll']):
+                print(key,'编号的左右条目数量对不上，请人工查看')
+            for index,item in enumerate(leftResult[key]['indexAll']):
+                if index<len(rightResult[key]['indexAll']):
+                    rightItem=rightResult[key]['indexAll'][index] 
+                    if '已开票' in str(dfReadRightList[rightItem][typeToColumnOfRight['科目全名']]):
+                       wsMain[4+item,typeToColumnOfLeft['凭证唯一码(已开票)']].value=dfReadRightList[rightItem][typeToColumnOfRight['凭证唯一码']]
+                       wsMain[4+item,typeToColumnOfLeft['凭证合并(已开票)']].value=dfReadRightList[rightItem][typeToColumnOfRight['凭证合并']]
+                       wsMain[4+item,typeToColumnOfLeft['凭证金额(已开票)']].value=dfReadRightList[rightItem][typeToColumnOfRight['凭证金额']]
+                    else:
+                       wsMain[4+item,typeToColumnOfLeft['凭证唯一码(未开票)']].value=dfReadRightList[rightItem][typeToColumnOfRight['凭证唯一码']]
+                       wsMain[4+item,typeToColumnOfLeft['凭证合并(未开票)']].value=dfReadRightList[rightItem][typeToColumnOfRight['凭证合并']]
+                       wsMain[4+item,typeToColumnOfLeft['凭证金额(未开票)']].value=dfReadRightList[rightItem][typeToColumnOfRight['凭证金额']]
+        else:
+            needAddLineAfter.append(leftResult[key]['indexAll'][-1])
+    else:
+        needAddLineAfter.append(leftResult[key]['indexAll'][-1])
+
+
+needAddLineAfterSort=sorted(needAddLineAfter,reverse=True)
+print('插入结果是',needAddLineAfterSort)
+for index,item in enumerate(needAddLineAfterSort):
+    wsMain.range(f'{item+4+2}:{item+4+2}').insert(shift='down')
+wbMain.save('123.xlsx')
+wbMain.close()
+appMain.quit()
