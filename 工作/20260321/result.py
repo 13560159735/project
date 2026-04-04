@@ -13,6 +13,7 @@ from collections import deque
 from docx.shared import Pt
 from docx.oxml.ns import qn
 
+
 word_path="1.docx"
 doc=Document(word_path)
 tables=doc.tables
