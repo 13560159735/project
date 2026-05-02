@@ -22,11 +22,11 @@ dfReadMain= pd.read_excel(
     dtype={'日期' : str},
 )
 
-# appMain = xw.App(visible=True)  # 不显示Excel界面
-# wbMain = appMain.books.open('银行存款.xlsx')
-# wsMainOfAll = wbMain.sheets['银行存款']
-# wsMainOfBorrow=wbMain.sheets['银行存款-借方']
-# wsMainOfLoan=wbMain.sheets['银行存款-贷方']
+appMain = xw.App(visible=True)  # 不显示Excel界面
+wbMain = appMain.books.open('银行存款.xlsx')
+wsMainOfAll = wbMain.sheets['银行存款']
+wsMainOfBorrow=wbMain.sheets['银行存款-借方']
+wsMainOfLoan=wbMain.sheets['银行存款-贷方']
 mainColumn={
     '日期凭证字凭证号':6,
     '一级科目':9,
@@ -45,5 +45,36 @@ for mainIndex,mainItem in enumerate(mainList):
         group[mainItem[mainColumn['日期凭证字凭证号']]]=[mainItem]
 
 with open('group.json', 'w', encoding='utf-8') as f:
-    json.dump(group, f, ensure_ascii=False, indent=4)        
+    json.dump(group, f, ensure_ascii=False, indent=4)   
 
+indexOfBorrow=2
+indexOfLoan=2
+
+for key,value in group.items():
+    belongToLoan=False
+    belongToBorrow=False
+    for valueIndex,valueItem in enumerate(value):
+        if valueItem[mainColumn['一级科目']]=='银行存款' and (not pd.isna(valueItem[mainColumn['借方金额']])):
+            belongToBorrow=True
+        if valueItem[mainColumn['一级科目']]=='银行存款' and (not pd.isna(valueItem[mainColumn['贷方金额']])):
+            belongToLoan=True
+
+    if belongToLoan==True:
+        for valueIndex,valueItem in enumerate(value):
+            currentIndex=valueItem[len(valueItem)-1]+2
+            print(f'处理到{currentIndex}行')
+            data=wsMainOfAll.range(f"{currentIndex}:{currentIndex}").value
+            wsMainOfLoan.range(f"{indexOfLoan}:{indexOfLoan}").value=data
+            indexOfLoan=indexOfLoan+1
+
+    if belongToBorrow==True:
+        for valueIndex,valueItem in enumerate(value):
+            currentIndex=valueItem[len(valueItem)-1]+2
+            print(f'处理到{currentIndex}行')
+            data=wsMainOfAll.range(f"{currentIndex}:{currentIndex}").value
+            wsMainOfBorrow.range(f"{indexOfBorrow}:{indexOfBorrow}").value=data
+            indexOfBorrow=indexOfBorrow+1
+
+wbMain.save('银行存款.xlsx')
+wbMain.close()
+appMain.quit()
