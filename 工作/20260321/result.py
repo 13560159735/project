@@ -148,3 +148,48 @@ for index,item in enumerate(investtreeList):
             run._element.rPr.rFonts.set(qn('w:eastAsia'), "宋体")
 
 doc.save("1_填充后.docx")
+
+realControlPerson={
+    'name':'深圳市前海一方科技研发集团有限公司',
+    'humanName':'赖少丽'
+}
+currentRes=fetch_data(f"http://open.api.tianyancha.com/services/v4/open/partners?name={realControlPerson['name']}&humanName={realControlPerson['humanName']}")
+allPartner={}
+for item in currentRes['result']['items']:
+    if item['hid'] in allPartner:
+        allPartner[item['hid']]={
+            'cid':item['cid'],
+            'hid':item['hid'],
+            'name':item['name'],
+            'count':allPartner[item['hid']]['count']+1
+        }
+    else:
+        allPartner[item['hid']]={
+            'cid':item['cid'],
+            'hid':item['hid'],
+            'name':item['name'],
+            'count':1
+        }
+    for itemPartner in item['partners']:
+        if itemPartner['hid'] in allPartner:
+            allPartner[itemPartner['hid']]={
+                'cid':itemPartner['cid'],
+                'hid':itemPartner['hid'],
+                'name':itemPartner['name'],
+                'count':allPartner[itemPartner['hid']]['count']+1    
+            }
+        else:
+            allPartner[itemPartner['hid']]={
+                'cid':itemPartner['cid'],
+                'hid':itemPartner['hid'],
+                'name':itemPartner['name'],
+                'count':1    
+            }
+
+with open('allPartner.json', 'w', encoding='utf-8') as f:
+    json.dump(allPartner, f, ensure_ascii=False, indent=4)
+allPartnerOrder=list(allPartner.values())
+allPartnerOrder.sort(key=lambda x: x["count"], reverse=True)
+
+with open('allPartnerOrder.json', 'w', encoding='utf-8') as f:
+    json.dump(allPartnerOrder, f, ensure_ascii=False, indent=4)
