@@ -26,23 +26,33 @@ def load_cache():
             return json.load(f)
     return {}
 
+# 保存缓存到文件
 def save_cache(cache):
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
         json.dump(cache, f, ensure_ascii=False, indent=2)
 
-cache=load_cache()
+
+# 初始化缓存（全局）
+cache = load_cache()
 
 def fetch_data(url):
+
     print('url',url)
+
     if url in cache:
-        print('走缓存')
+        print("走缓存")
         return cache[url]
-    print('调用接口')
-    headers={'Authorization': '28041b0a-feec-49df-9d42-21c21e208bca'}
-    res=requests.get(url,headers=headers)
-    response=res.json
-    cache[url]=response
+
+    print("调用接口")
+    headers={'Authorization': "28041b0a-feec-49df-9d42-21c21e208bca"}
+    res = requests.get(url, headers=headers)
+    response=res.json()
+
+    cache[url] = response
+
+    # 每次更新都写入文件（简单但安全）
     save_cache(cache)
+
     return response
 
 res=fetch_data('http://open.api.tianyancha.com/services/v3/open/investtree?flag=4&dir=down&keyword=深圳市前海一方科技研发集团有限公司&minPercent=0&maxPercent=1')
@@ -217,7 +227,8 @@ for item in allPartnerOrder:
         break
 
 for item in allPartnerOrder:
-    if item['name']!=realControlPerson['humanName'] and item['count']>=5:
+    print(item,'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    if item['name']!=realControlPerson['humanName'] and (item['count']>=1 or item['name'][0]=="赖") :
         pageNum=1
         currentPartnerCompany=[]
         while True:
@@ -234,7 +245,6 @@ for item in allPartnerOrder:
                         realControlPersonCompanyOnlyName.append(itemCompany['name'])
             if len(currentPartnerCompany)>=(((currentRes or {}).get('result') or {}).get('total') or 0):
                 break
-        break
 
 for index,item in enumerate(realControlPersonCompany):
     row=tables[3].add_row().cells
