@@ -14,16 +14,20 @@ from docx.shared import Pt
 from docx.oxml.ns import qn
 from pyecharts.charts import Bar
 from pyecharts import options as opts
+import time
+
+# 新增：记录开始时间
+start_time = time.time()
 
 dfReadMain= pd.read_excel(
-    '银行存款.xlsx', 
+    '银行存款1.xlsx', 
     sheet_name='银行存款',
     header=[0],
     dtype={'日期' : str},
 )
 
-appMain = xw.App(visible=True)  # 不显示Excel界面
-wbMain = appMain.books.open('银行存款.xlsx')
+appMain = xw.App(visible=False)  # 不显示Excel界面
+wbMain = appMain.books.open('银行存款1.xlsx')
 wsMainOfAll = wbMain.sheets['银行存款']
 wsMainOfBorrow=wbMain.sheets['银行存款-借方']
 wsMainOfLoan=wbMain.sheets['银行存款-贷方']
@@ -49,7 +53,8 @@ with open('group.json', 'w', encoding='utf-8') as f:
 
 indexOfBorrow=2
 indexOfLoan=2
-
+middle = time.time()
+print(f"middle完成，总耗时：{middle - start_time:.2f} 秒")
 for key,value in group.items():
     belongToLoan=False
     belongToBorrow=False
@@ -62,7 +67,7 @@ for key,value in group.items():
     if belongToLoan==True:
         for valueIndex,valueItem in enumerate(value):
             currentIndex=valueItem[len(valueItem)-1]+2
-            print(f'处理到{currentIndex}行')
+            # print(f'处理到{currentIndex}行')
             data=wsMainOfAll.range(f"{currentIndex}:{currentIndex}").value
             wsMainOfLoan.range(f"{indexOfLoan}:{indexOfLoan}").value=data
             indexOfLoan=indexOfLoan+1
@@ -70,11 +75,15 @@ for key,value in group.items():
     if belongToBorrow==True:
         for valueIndex,valueItem in enumerate(value):
             currentIndex=valueItem[len(valueItem)-1]+2
-            print(f'处理到{currentIndex}行')
+            # print(f'处理到{currentIndex}行')
             data=wsMainOfAll.range(f"{currentIndex}:{currentIndex}").value
             wsMainOfBorrow.range(f"{indexOfBorrow}:{indexOfBorrow}").value=data
             indexOfBorrow=indexOfBorrow+1
 
-wbMain.save('银行存款.xlsx')
+wbMain.save('银行存款1.xlsx')
 wbMain.close()
 appMain.quit()
+
+end_time = time.time()
+elapsed = end_time - start_time
+print(f"处理完成，总耗时：{elapsed:.2f} 秒")
