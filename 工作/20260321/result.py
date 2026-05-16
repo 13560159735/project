@@ -193,3 +193,57 @@ allPartnerOrder.sort(key=lambda x: x["count"], reverse=True)
 
 with open('allPartnerOrder.json', 'w', encoding='utf-8') as f:
     json.dump(allPartnerOrder, f, ensure_ascii=False, indent=4)
+
+realControlPersonCompany=[]
+realControlPersonCompanyOnlyName=[]
+for item in allPartnerOrder:
+    if item['name']==realControlPerson['humanName']:
+        pageNum=1
+        currentPartnerCompany=[]
+        while True:
+            currentRes=fetch_data(f"http://open.api.tianyancha.com/services/open/human/companyholding/2.0?hid={item['hid']}&pageSize=20&pageNum={pageNum}&cid={item['cid']}")
+            pageNum=pageNum+1
+            for itemCompany in ((currentRes or {}).get('result') or {}).get('items') or []:
+                currentPartnerCompany.append(itemCompany['name'])
+                if itemCompany['regStatus']!="注销":
+                    if itemCompany['name'] not in realControlPersonCompanyOnlyName:
+                        realControlPersonCompany.append([
+                            itemCompany['name'],
+                            '实际控制人控制的公司'
+                        ])
+                        realControlPersonCompanyOnlyName.append(itemCompany['name'])
+            if len(currentPartnerCompany)>=(((currentRes or {}).get('result') or {}).get('total') or 0):
+                break
+        break
+
+for item in allPartnerOrder:
+    if item['name']!=realControlPerson['humanName'] and item['count']>=5:
+        pageNum=1
+        currentPartnerCompany=[]
+        while True:
+            currentRes=fetch_data(f"http://open.api.tianyancha.com/services/open/human/companyholding/2.0?hid={item['hid']}&pageSize=20&pageNum={pageNum}&cid={item['cid']}")
+            pageNum=pageNum+1
+            for itemCompany in ((currentRes or {}).get('result') or {}).get('items') or []:
+                currentPartnerCompany.append(itemCompany['name'])
+                if itemCompany['regStatus']!="注销":
+                    if itemCompany['name'] not in realControlPersonCompanyOnlyName:
+                        realControlPersonCompany.append([
+                            itemCompany['name'],
+                            '实际控制人关系亲密的家庭成员控制的公司'
+                        ])
+                        realControlPersonCompanyOnlyName.append(itemCompany['name'])
+            if len(currentPartnerCompany)>=(((currentRes or {}).get('result') or {}).get('total') or 0):
+                break
+        break
+
+for index,item in enumerate(realControlPersonCompany):
+    row=tables[3].add_row().cells
+    for indexValueList,itemValueList in enumerate (item):
+        p=row[indexValueList].paragraphs[0]
+        run=p.add_run(itemValueList)
+        run.font.name = "宋体"
+        run._element.rPr.rFonts.set(qn('w:eastAsia'), "宋体")
+
+doc.save("1_填充后.docx")
+
+            
