@@ -31884,6 +31884,21 @@
     "reason": "经查无结果",
     "error_code": 300000
   },
+  "http://open.api.tianyancha.com/services/open/human/companyholding/2.0?hid=4902879968&pageSize=20&pageNum=1&cid=4902880030": {
+    "result": null,
+    "reason": "经查无结果",
+    "error_code": 300000
+  },
+  "http://open.api.tianyancha.com/services/open/human/companyholding/2.0?hid=4902880002&pageSize=20&pageNum=1&cid=4902880030": {
+    "result": null,
+    "reason": "经查无结果",
+    "error_code": 300000
+  },
+  "http://open.api.tianyancha.com/services/open/human/companyholding/2.0?hid=2215813465&pageSize=20&pageNum=1&cid=3342289845": {
+    "result": null,
+    "reason": "经查无结果",
+    "error_code": 300000
+  },
   "http://open.api.tianyancha.com/services/open/human/companyholding/2.0?hid=1921293102&pageSize=20&pageNum=1&cid=4902880030": {
     "result": {
       "total": 1,
@@ -31936,20 +31951,5 @@
     },
     "reason": "ok",
     "error_code": 0
-  },
-  "http://open.api.tianyancha.com/services/open/human/companyholding/2.0?hid=4902879968&pageSize=20&pageNum=1&cid=4902880030": {
-    "result": null,
-    "reason": "经查无结果",
-    "error_code": 300000
-  },
-  "http://open.api.tianyancha.com/services/open/human/companyholding/2.0?hid=4902880002&pageSize=20&pageNum=1&cid=4902880030": {
-    "result": null,
-    "reason": "经查无结果",
-    "error_code": 300000
-  },
-  "http://open.api.tianyancha.com/services/open/human/companyholding/2.0?hid=2215813465&pageSize=20&pageNum=1&cid=3342289845": {
-    "result": null,
-    "reason": "经查无结果",
-    "error_code": 300000
   }
 }

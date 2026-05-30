@@ -96,12 +96,16 @@ with open('investtreeList1.json', 'w', encoding='utf-8') as f:
     json.dump(investtreeList, f, ensure_ascii=False, indent=4)
 
 for index,item in enumerate(investtreeList):
-    if float(item['持股比例（%）'])<40:
-        currentRes=fetch_data(f"http://open.api.tianyancha.com/services/open/ic/baseinfoV3/2.0?keyword={item['社会统一信用代码']}")
-        item['注册地']=currentRes['result']['city']
-        item['业务性质']=currentRes['result']['industryAll']['category']
-        item['对合营企业或联营企业投资的会计处理方法']='权益法'
-        item['注册资本（万元）']=f"{float(currentRes['result']['regCapital'].split('万')[0]):,.2f}"
+    currentRes=fetch_data(f"http://open.api.tianyancha.com/services/open/ic/baseinfoV3/2.0?keyword={item['社会统一信用代码']}")
+    item['注册地']=currentRes['result']['city']
+    item['业务性质']=currentRes['result']['industryAll']['category']
+    item['对合营企业或联营企业投资的会计处理方法']='权益法'
+    item['注册资本（万元）']=f"{float(currentRes['result']['regCapital'].split('万')[0]):,.2f}"
+    timestamp_ms=currentRes['result']['estiblishTime']
+    timestamp_s=timestamp_ms/1000
+    dt=datetime.fromtimestamp(timestamp_s)
+    date_str=dt.strftime('%Y-%m-%d')
+    item['成立日期（注册日期）']=date_str
 with open('investtreeList2.json', 'w', encoding='utf-8') as f:
     json.dump(investtreeList, f, ensure_ascii=False, indent=4)
         
@@ -124,6 +128,42 @@ for i in range(len(tables[3].rows)-1,0,-1):
 
 
 for index,item in enumerate(investtreeList):
+    dateLimitString="2025-12-31"
+    dateLimit=datetime.strptime(dateLimitString,"%Y-%m-%d")
+    dateItemString=item['成立日期（注册日期）']
+    dateItem=datetime.strptime(dateItemString,"%Y-%m-%d")
+
+    if dateItem>dateLimit:
+        continue
+    pageNum=1
+    changeinforAll=[]
+    while True:
+        changeinfoRes=fetch_data(f"http://open.api.tianyancha.com/services/open/ic/changeinfo/2.0?keyword={item['子公司名称']}&pageNum={pageNum}&pageSize=20")
+        pageNum=pageNum+1
+        for changeinforResItem in ((changeinfoRes or {}).get('result') or {}).get('items') or []:
+            changeinforAll.append(changeinforResItem)
+        changeTimeString=None
+        changeTime=None
+        if len(changeinforAll)>0:
+            changeTimeString=changeinforAll[-1]['changeTime']
+            changeTime=datetime.strptime(changeTimeString,"%Y-%m-%d")
+        if len(changeinforAll)>=(((changeinfoRes or {}).get('result') or {}).get('total') or 0) or (changeTime is not None and changeTime<dateLimit):
+            break
+    needHumanLook=False
+    for changeInforAllItem in changeinforAll:
+        changeTimeString=changeInforAllItem['changeTime']
+        changeTime=datetime.strptime(changeTimeString,"%Y-%m-%d")
+        if changeInforAllItem['changeItem']=='投资人变更（包括出资额、出资方式、出资日期、投资人名称等）' and changeTime>dateLimit:
+            needHumanLook=True
+            break
+    if needHumanLook==True:
+        item['变更记录']=changeinforAll
+        with open(f'{item['子公司名称']}的信息及变更记录.json', 'w', encoding='utf-8') as f:
+            json.dump(item, f, ensure_ascii=False, indent=4)   
+        print(f'{item['子公司名称']}的"投资人变更（包括出资额、出资方式、出资日期、投资人名称等）"在{dateLimitString}之后有变动，请人工查看"{item['子公司名称']}的信息及变更记录.json"文件') 
+
+
+
     if float(item['持股比例（%）'])<40:
         row=tables[2].add_row().cells
         valueList=[
@@ -227,7 +267,6 @@ for item in allPartnerOrder:
         break
 
 for item in allPartnerOrder:
-    print(item,'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
     if item['name']!=realControlPerson['humanName'] and (item['count']>=1 or item['name'][0]=="赖") :
         pageNum=1
         currentPartnerCompany=[]
