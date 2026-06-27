@@ -4,6 +4,7 @@ from docx import Document
 from openpyxl import Workbook
 from openpyxl.styles import Border, Side, numbers, Font
 
+
 def try_convert_to_number(s):
     """将可能含千分位逗号的字符串转为数字，成功返回(数字,True)，否则返回(None,False)"""
     if not isinstance(s, str):
@@ -36,8 +37,7 @@ def get_cell_merge_info(table):
     processed_cells=set()
 
     rows=table.rows
-    cols=l
-    else 0
+
 
     for r , row in enumerate(rows):
         for c , cell in enumerate(row.cells):
@@ -52,7 +52,11 @@ def get_cell_merge_info(table):
             v_span=1
             if v_merge is not None:
                 for check_r in range(r+1,len(rows)):
-                    check_cell=rows[check_r].cells[c] if c<len(rows[check_r].cells) else None
+                    # check_cell=rows[check_r].cells[c] if c<len(rows[check_r].cells) else None
+                    check_cell= None
+                    if c<len(rows[check_r].cells):
+                        check_cell=rows[check_r].cells[c]
+
                     if check_cell is None:
                         break
                     check_tcPr=check_cell._element.get_or_add_tcPr()
@@ -129,7 +133,36 @@ def extract_with_formatting(docx_path, target_title, output_excel):
 
             end_row=start_row+len(table.rows)-1   
             max_col=max((len(row.cells) for row in table.rows) , default=0)
-            table_start_rows.append((start_row,end_row,max_col,merge_info))    
+            table_start_rows.append((start_row,end_row,max_col,merge_info))   
+            #创建一个字典，快速查找合并信息
+            merge_dict={(r,c):(v_span,h_span) for r,c,v_span,h_span in merge_info}  
+            top_bold=Side(style='medium')
+            bottom_bold=Side(style='medium')
+            thin_side=Side(style='thin')
+            no_side=Side(style=None)
+            for i in range(start_row,end_row+1):
+                for j in range(1,max_col+1):
+                    #获取相对表格的行列位置
+                    rel_row=i-start_row
+                    rel_col=j-1
+                    #检查这个单元格是否为合并区域的一部分（但不是起始单元格）
+                    is_merged_none_start=False
+                    for r,c,v_span,h_span in merge_info:
+                        if r <= rel_row < r+v_span and c <= rel_col < c+h_span and not(rel_row==r and rel_col==c):
+                            is_merged_none_start=True
+                            break
+                    if is_merged_none_start:
+                        continue
+                    if (rel_row,rel_col) in merge_dict:
+                        v_span,h_span = merge_dict[(rel_row,rel_col)]
+                        #对于合并单元格，根据合并范围设置边框
+                        top=top_bold if i == start_row else thin_side
+                        bottom=bottom_bold if i+v_span-1 == end_row else thin_side
+                        left=no_side if j == 1 else thin_side
+                        right=no_side if j+h_span-1 == max_col else thin_side
+
+
+
 
 
 
