@@ -117,7 +117,7 @@ def extract_with_formatting(docx_path, target_title, output_excel):
                     if is_num:
                         excel_cell.value = num_val
                         if isinstance(num_val, int):
-                            excel_cell.number_format = '#,##0'
+                            excel_cell.number_format = '#,##0.00'
                         else:
                             excel_cell.number_format = '#,##0.00'
                     else:
@@ -160,6 +160,36 @@ def extract_with_formatting(docx_path, target_title, output_excel):
                         bottom=bottom_bold if i+v_span-1 == end_row else thin_side
                         left=no_side if j == 1 else thin_side
                         right=no_side if j+h_span-1 == max_col else thin_side
+                    else:
+                        top=top_bold if i == start_row else thin_side
+                        bottom=bottom_bold if i == end_row else thin_side
+                        left=no_side if j == 1 else thin_side
+                        right=no_side if j == max_col else thin_side
+                    ws.cell(row=i,column=j).border=Border(
+                        left=left,
+                        right=right,
+                        top=top,
+                        bottom=bottom
+                    )
+            
+            row_idx+=len(table.rows)+1
+
+
+    for start_row,end_row,max_col,merge_info in table_start_rows:
+        for r,c,v_span,h_span in merge_info:
+            if v_span > 1 or h_span > 1:
+                start_cell=ws.cell(row=start_row+r,column=1+c)
+                end_cell=ws.cell(row=start_row+r+v_span-1,column=1+c+h_span-1)
+                ws.merge_cells(f'{start_cell.coordinate}:{end_cell.coordinate}')
+    wb.save(output_excel)
+    print(f'已保存至：{output_excel}')
+if __name__=='__main__':
+    docx_file = r"./3、佑荣科技2025年财审报告附注.docx"
+    excel_file = r"./附注_合并项目注释_完整格式(1).xlsx"
+    extract_with_formatting(docx_file,"八、财务报表主要项目注释",excel_file)
+
+                    
+
 
 
 
