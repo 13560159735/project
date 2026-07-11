@@ -58,7 +58,77 @@ def iter_doc_elements_from_title(doc,target_title):
                 yield 'tbl',table
 
 
+def load_excel_rows(excel_path):
+    wb=load_workbook(excel_path,data_only=True)
+    ws=wb.active
+    #构建包含工作表所有单元格值和加粗标注的矩阵
+    max_row=ws.max_row
+    max_col=ws.max_column
+    grid_value=[[ws.cell(row=r,column=c).value for c in range(1,max_col+1)] for r in range(1,max_row+1)]
+    grid_bolds=[[bool(ws.cell(row=r,column=c).font and ws.cell(row=r,column=c).font.bold)  for c in range(1,max_col+1)] for r in range(1,max_row+1) ]
+    #展开所有合并单元格区域：将合并区域内每个格子都填充为主单元格（左上角）的值和加粗标志
+    for mrange in ws.merge_cells.ranges:
+        try:
+            min_row,min_col,max_row_m,max_col_m = mrange.min_row,mrange.min_col,mrange.max_row,mrange.max_col
+        except Exception:
+            #兼容老版本openpyxl的字符串表示
+            bounds=mrange.bounds
+            min_col,min_row,max_col_m,max_row_m = bounds
+        val=ws.cell(row=min_row,column=min_col).value
+        bold_flag=bool(ws.cell(row=min_row,column=min_col).font and ws.cell(row=min_row,column=min_col).font.bold)
+        for rr in range(min_row,max_row_m+1):
+            for cc in range(min_col,max_col_m+1):
+                grid_value[rr-1][cc-1]=val
+                grid_bolds[rr-1][cc-1]=bold_flag
+    #返回值和加粗信息的并行矩阵（行作为tuple）
+    return [tuple(row) for row in grid_value],[tuple(row) for row in grid_bolds]
 
+
+def update_doc_from_excel(doc_path,excel_path,output_path,target_title):
+    doc=Document(doc_path)
+    excel_rows,excel_bolds = load_excel_rows(excel_path)
+    excel_index=0
+
+    def next_nonempty_row():
+        nonlocal excel_index
+        while excel_index < len(excel_rows) and is_blank_row(excel_rows[excel_index]):
+            excel_index +=1
+        if excel_index >= len(excel_rows):
+            return None
+        row=excel_rows[excel_index]
+        bolds=excel_bolds[excel_index]
+        excel_index +=1
+        return row,bolds
+
+    for elem_type,elem in iter_doc_elements_from_title(doc,target_title):
+        if elem_type == 'p':
+            nr=next_nonempty_row()
+            if nr is None:
+                break
+            row_vals,row_bolds=nr
+            value=row_vals[0] if len(row_vals)>0 else None
+            bold_flag=row_bolds[0] if len(row_bolds)>0 else None
+        
+        
+
+        
+
+
+
+    
+
+
+
+
+
+
+
+if __name__== "__main__":
+    docx_path=Path('./3、佑荣科技2025年财审报告附注.docx')
+    excel_path=Path('./附注_合并项目注释_完整格式(1).xlsx')
+    output_path=Path('./3、佑荣科技2025年财审报告附注_更新.docx')
+    title = "八、财务报表主要项目注释"
+    update_doc_from_excel(docx_path,excel_path,output_path,title)
 
 
 
