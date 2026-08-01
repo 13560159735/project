@@ -2,7 +2,8 @@ import os
 import re
 from docx import Document
 from openpyxl import Workbook
-from openpyxl.styles import Border, Side, numbers, Font
+from openpyxl.styles import Border, Side, numbers, Font, Alignment
+from docx.oxml.ns import qn
 
 
 def try_convert_to_number(s):
@@ -30,6 +31,55 @@ def paragraph_has_bold(para):
         if run.bold:
             return True
     return False
+
+
+def get_word_cell_vertical_aligment(cell):
+    #读取word的单元格垂直对齐方式，返回'top'/'center'/'bottom' 或 None
+    tcPr=cell._element.find(qn('w:tcPr'))
+    if tcPr is None:
+        return None
+    v_align=tcPr.find(qn('w:vAlign'))
+    if v_align is None:
+        return None
+    val=v_align.get(qn('w:val'))
+    if val in ('top','center','bottom'):
+        return val
+    return None
+
+def get_word_para_horizontal_aligment(para):
+    #读取word的段落水平对齐方式，返回'left'/'center'/'right'/'justify' 或 None
+    pPr=para._element.find(qn('w:pPr'))
+    if pPr is None:
+        return None
+    jc=pPr.find(qn('w:jc'))
+    if jc is None:
+        return None
+    val=jc.get(qn('w:val'))
+    mapping = {
+        'left':'left',
+        'start':'left',
+        'center':'center',
+        'centered':'center',
+        'right':'right',
+        'end':'right',
+        'both':'justify',
+        'justify':'justify',
+        'distribute':'justify'
+    }
+    return mapping.get(val)
+
+def get_word_cell_horizontal_aligment(cell):
+    #读取word的单元格的水平对齐方式（取第一个有对齐设置的段落）
+    for para in cell.paragraphs:
+        h_align = get_word_para_horizontal_aligment(para)
+        if h_align is not None:
+            return h_align
+    return None
+
+
+
+
+    
 
 
 def get_cell_merge_info(table):
@@ -130,6 +180,14 @@ def extract_with_formatting(docx_path, target_title, output_excel):
                             break
                     if has_bold:
                         excel_cell.font=Font(bold=True)
+                    
+                    #保持单元格的水平和垂直的对齐方式
+                    h_align = get_word_cell_horizontal_aligment(cell)
+                    v_align = get_word_cell_vertical_aligment(cell)
+                    if h_align is not None or v_align is not None:
+                        excel_cell.alignment = Alignment(horizontal=h_align,vertical=v_align)
+
+                    
 
             end_row=start_row+len(table.rows)-1   
             max_col=max((len(row.cells) for row in table.rows) , default=0)
