@@ -1,9 +1,48 @@
 from pathlib import Path
 
 from docx import Document
+from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
 from openpyxl import load_workbook
+
+
+def set_word_cell_vertical_alignment(cell,v_align):
+    #设置word单元格的垂直对齐方式：‘top’/‘center’/‘bottom’
+    if v_align not in ('top','center','bottom'):
+        return
+    tcPr=cell._element.get_or_add_tcPr()
+    #移除已有的vAlign
+    for old in tcPr.findall(qn('w:vAlign')):
+        tcPr.remove(old)
+    v_align_el = OxmlElement('w:vAlign')
+    v_align_el.set(qn('w:val'),v_align)
+    tcPr.append(v_align_el)
+
+def set_word_para_horizontal_alignment(para,h_align):
+    #设置word段落的水平对齐方式：'left'/'center'/'right'/'justify'/
+    mapping={
+        'left':'left',
+        'center':'center',
+        'right':'right',
+        'justify':'both'
+    }
+    jc_val = mapping.get(h_align)
+    if jc_val is None:
+        return
+    pPr=para._element.get_or_add_pPr()
+    for old in pPr.findall(qn('w:jc')):
+        pPr.remove(old)
+    jc_el=OxmlElement('w:jc')
+    jc_el.set(qn('w:val'),jc_val)
+    pPr.append(jc_el)
+
+
+
+
+
+
+
 
 def is_blank_row(row_values):
     return all(value is None or str(value).strip()=='' for value in row_values)

@@ -32,6 +32,47 @@ def paragraph_has_bold(para):
             return True
     return False
 
+# person='mike'
+
+# person={
+#     'name':'judy',
+#     'age':17,
+#     'work':'engineer'  
+# }
+
+# person={
+#     'name':{
+#         '1991-1993':'mike',
+#         '1994-':'judy',
+#     },
+#     'age':17,
+#     'work':'engineer'
+# }
+
+# person={
+#     'name':{
+#         '1991-1993':'mike',
+#         '1994-':'judy',
+#     },
+#     'age':17,
+#     'career':{
+#         'teacher':{
+#             'timeRange':'1991-1992',
+#             'salary':1000,
+#         },
+#         'engineer':{
+#             'timeRange':'1992-1998',
+#             'salary':8000,
+#         },
+#         'manager':{
+#             'timeRange':'1998-',
+#             'salary':18000,
+#         },
+#     }
+# }
+
+
+
 
 def get_word_cell_vertical_aligment(cell):
     #读取word的单元格垂直对齐方式，返回'top'/'center'/'bottom' 或 None
