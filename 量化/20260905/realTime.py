@@ -101,3 +101,59 @@ def fetch_quote(symbol:str) -> dict|None:
     }
     
 # 把real_time_date["quote_time"] (yyyymmddHHMMSS)解析为datetime; real_time_date为空或格式异常时，返回系统当前时间
+def parse_quote_time(real_time_date:dict|None)->datetime.datetime:
+    if not real_time_date:
+        print('real_time_date为空，使用系统当前时间')
+        return datetime.datetime.now()
+    try:
+        return datetime.datetime.strptime(real_time_date['quote_time'],'%Y%m%d%H%M%S')
+    except (KeyError,TypeError,ValueError):
+        print('real_time_date格式异常，使用系统当前时间')
+        return datetime.datetime.now()
+
+# 展示实时行情文本，如下：
+# 2026-09-19 21:02:20 茅台(sh600519) 现价 127.78 ↑13.54(1.2%) | 今开 127.10 最高 127.99 最低 126.10 昨收 125.50
+# 2026-09-19 21:02:20 茅台(sh600519) 现价 127.78 ↓-13.54(2.3%) | 今开 127.10 最高 127.99 最低 126.10 昨收 125.50
+# 2026-09-19 21:02:20 茅台(sh600519) 现价 127.78 →0(0%) | 今开 127.10 最高 127.99 最低 126.10 昨收 125.50
+def build_line(real_time_date:dict|None)->str:
+    try:
+        change=float(real_time_date['change'])
+    except (TypeError,ValueError):
+        change = 0.0
+    arrow = '→'
+    if change > 0:
+        arrow = '↑'
+    elif change < 0:
+        arrow = '↓'
+
+    quote_dt = parse_quote_time(real_time_date)
+    return(
+        f'{quote_dt:%Y-%m-%d %H:%M:%S} {real_time_date['name']}({real_time_date['code']}) ' 
+        f'现价 {real_time_date['price']} {arrow}{real_time_date['change']} ({real_time_date['change_pct']}%) | '
+        f'今开 {real_time_date['open']} 最高 {real_time_date['high']} 最低 {real_time_date['low']} 昨收 {real_time_date['prev_close']}'
+        
+    )
+
+# 主循环
+def monitor(symbol:str)->None:
+    print(f'开始监控 {symbol},每{REFRESH_INTERVAL}秒刷新一次')
+    while True:
+        real_time_date = fetch_quote(symbol)
+        quote_dt = parse_quote_time(real_time_date) 
+        if not is_trading_time(quote_dt):
+            msg = '暂无交易(行情时间不在交易时段)'
+        elif float(real_time_date['open'] or 0) == 0:
+            msg = '暂无交易(今日无成交，可能停牌)'
+        else:
+            msg = None
+        if msg:
+            print(f'{quote_dt:%Y-%m-%d %H:%M:%S} {msg}')
+        else:
+            print(build_line(real_time_date))
+        time.sleep(REFRESH_INTERVAL)
+
+symbol = normalize_code('sh600519')
+if symbol == None:
+    print('请输入 6 位数字股票代码(如 600519)，或带市场前缀(如 sh600519)')
+else:
+    monitor(symbol)
