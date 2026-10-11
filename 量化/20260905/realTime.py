@@ -140,12 +140,16 @@ def monitor(symbol:str)->None:
     while True:
         real_time_date = fetch_quote(symbol)
         quote_dt = parse_quote_time(real_time_date) 
-        if not is_trading_time(quote_dt):
+
+        if not real_time_date:
+            msg = '本次接口返回错误,继续监控'
+        elif not is_trading_time(quote_dt):
             msg = '暂无交易(行情时间不在交易时段)'
         elif float(real_time_date['open'] or 0) == 0:
             msg = '暂无交易(今日无成交，可能停牌)'
         else:
             msg = None
+            
         if msg:
             print(f'{quote_dt:%Y-%m-%d %H:%M:%S} {msg}')
         else:
